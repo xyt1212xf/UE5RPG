@@ -34,15 +34,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "WarriorAbility")
 	EWarriorAbilityActivationPolicy AbilityActivationPolicy = EWarriorAbilityActivationPolicy::OnTriggered;
 
-	UFUNCTION(BlueprintPure, Category = "Warrior|Ablity")
+	UFUNCTION(BlueprintPure, Category = "Warrior|Ability")
 	UPawnCombatComponent* GetPawnCombatComponentFromActorInfo() const;
 	
-	UFUNCTION(BlueprintPure, Category = "Warrior|Ablity")
+	UFUNCTION(BlueprintPure, Category = "Warrior|Ability")
+	UWarriorAbilitySystemComponent* GetWarriorAbilitySystemComponent()const;
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|Ability")
 	UWarriorAbilitySystemComponent* GetWarriorAbilitySystemComponentFromActorInfo()const;
 
 	FActiveGameplayEffectHandle NativeApplyEffectSpecHandleToTarget(AActor* TargetActor, const FGameplayEffectSpecHandle& InSpecHandle);
 
-	UFUNCTION(BlueprintCallable, Category = "Warrior|Ablity", meta = (DisplayName = "AppleGameplayEffectSpecHandleToTargetActor", ExpandEnumAsExecs = "OutSuccessType"))
+	UFUNCTION(BlueprintCallable, Category = "Warrior|Ability", meta = (DisplayName = "Apple Gameplay Effect SpecHandle To Target Actor", ExpandEnumAsExecs = "OutSuccessType"))
 	FActiveGameplayEffectHandle BP_EffectSpecHandleToTarget(AActor* TargetActor, const FGameplayEffectSpecHandle& InSpecHandle, EWarriorSuccessType& OutSuccessType);
 
 };
