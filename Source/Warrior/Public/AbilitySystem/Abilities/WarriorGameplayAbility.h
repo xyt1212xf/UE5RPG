@@ -38,4 +38,7 @@ protected:
 	
 	UFUNCTION(BlueprintPure, Category = "Warrior|Ablity")
 	UWarriorAbilitySystemComponent* GetWarriorAbilitySystemComponent()const ;
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|Ablity")
+	UWarriorAbilitySystemComponent* GetWarriorAbilitySystemComponentFromActorInfo()const;
 };

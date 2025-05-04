@@ -40,3 +40,8 @@ UWarriorAbilitySystemComponent* UWarriorGameplayAbility::GetWarriorAbilitySystem
 	return Cast<UWarriorAbilitySystemComponent>(CurrentActorInfo->AbilitySystemComponent);
 }
 
+UWarriorAbilitySystemComponent* UWarriorGameplayAbility::GetWarriorAbilitySystemComponentFromActorInfo() const
+{
+	return Cast<UWarriorAbilitySystemComponent>(CurrentActorInfo->AbilitySystemComponent);
+}
+
