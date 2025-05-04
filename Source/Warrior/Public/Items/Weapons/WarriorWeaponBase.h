@@ -6,7 +6,6 @@
 #include "GameFramework/Actor.h"
 #include "WarriorWeaponBase.generated.h"
 class UBoxComponent;
-
 DECLARE_DELEGATE_OneParam(FOnTargetInterfacedDelegate, AActor*)
 
 UCLASS()
