@@ -34,6 +34,7 @@ UGEExecCalc_DamageTaken::UGEExecCalc_DamageTaken()
 
 	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().AttackPowerDef);
 	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().DefensePowerDef);
+	RelevantAttributesToCapture.Add(GetWarriorDamageCapture().DamageTakenDef);
 }
 
 void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
@@ -45,7 +46,7 @@ void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustom
 
 	// Get the captured attributes
 	float SourceAttackPower = 0.f;
-	ExecutionParams.AttemptCalculateCapturedAttributeBonusMagnitude(
+	bool bSuccess = ExecutionParams.AttemptCalculateCapturedAttributeBonusMagnitude(
 		GetWarriorDamageCapture().AttackPowerDef,
 		EvaluateParameters,
 		SourceAttackPower

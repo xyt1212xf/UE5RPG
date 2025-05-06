@@ -51,10 +51,9 @@ FActiveGameplayEffectHandle UWarriorGameplayAbility::NativeApplyEffectSpecHandle
 	auto* TargetASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(TargetActor);
 	check(TargetASC && InSpecHandle.IsValid());
 	
-	GetWarriorAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(
+	return GetWarriorAbilitySystemComponentFromActorInfo()->ApplyGameplayEffectSpecToTarget(
 		*InSpecHandle.Data, 
 		TargetASC);
-	return FActiveGameplayEffectHandle();
 }
 
 FActiveGameplayEffectHandle UWarriorGameplayAbility::BP_EffectSpecHandleToTarget(AActor* TargetActor, const FGameplayEffectSpecHandle& InSpecHandle, EWarriorSuccessType& OutSuccessType)
