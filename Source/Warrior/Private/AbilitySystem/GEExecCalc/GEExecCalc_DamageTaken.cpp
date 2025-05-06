@@ -4,15 +4,18 @@
 #include "AbilitySystem/GEExecCalc/GEExecCalc_DamageTaken.h"
 #include "AbilitySystem/WarriorAttributeSet.h"
 #include "WarriorGameplayTags.h"
-
+#include "WarriorDebugHelper.h"
 struct FWarriorDamageCapture
 {
 	DECLARE_ATTRIBUTE_CAPTUREDEF(AttackPower);
 	DECLARE_ATTRIBUTE_CAPTUREDEF(DefensePower);
+	DECLARE_ATTRIBUTE_CAPTUREDEF(DamageTaken);
+	
 	FWarriorDamageCapture()
 	{
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UWarriorAttributeSet, AttackPower, Source, false);
 		DEFINE_ATTRIBUTE_CAPTUREDEF(UWarriorAttributeSet, DefensePower, Target, false);
+		DEFINE_ATTRIBUTE_CAPTUREDEF(UWarriorAttributeSet, DamageTaken, Target, false);
 	};
 };
 
@@ -73,4 +76,26 @@ void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustom
 		EvaluateParameters,
 		TargetDefensePower
 	);
+	if (UsedLightAttackComboCount != 0)
+	{
+		const float DamageIncreasePercentLight = (UsedLightAttackComboCount - 1) * 0.005 + 1.f;
+		BaseDamage *= DamageIncreasePercentLight;
+	}
+	if (UsedHeavyAttackComboCount != 0)
+	{
+		const float DamageIncreasePercentHeavy = UsedHeavyAttackComboCount * 0.15f + 1.f;
+		BaseDamage *= DamageIncreasePercentHeavy;
+	}
+	const float FinalDamageDone = BaseDamage * SourceAttackPower / TargetDefensePower;
+	if (FinalDamageDone > 0)
+	{
+		OutExecutionOutput.AddOutputModifier(
+			FGameplayModifierEvaluatedData(
+				GetWarriorDamageCapture().DamageTakenProperty,
+				EGameplayModOp::Override,
+				FinalDamageDone
+			)
+		);
+	}
+	Debug::Print("FinalDamageDone", FinalDamageDone);
 }
