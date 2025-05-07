@@ -87,7 +87,8 @@ void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustom
 		const float DamageIncreasePercentHeavy = UsedHeavyAttackComboCount * 0.15f + 1.f;
 		BaseDamage *= DamageIncreasePercentHeavy;
 	}
-	const float FinalDamageDone = BaseDamage * SourceAttackPower / TargetDefensePower;
+	//const float FinalDamageDone = BaseDamage *SourceAttackPower / TargetDefensePower;
+	const float FinalDamageDone = BaseDamage;
 	if (FinalDamageDone > 0)
 	{
 		OutExecutionOutput.AddOutputModifier(
