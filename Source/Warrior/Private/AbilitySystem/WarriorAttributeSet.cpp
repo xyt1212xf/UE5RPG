@@ -3,6 +3,8 @@
 
 #include "AbilitySystem/WarriorAttributeSet.h"
 #include "GameplayEffectExtension.h"
+#include "WarriorFunctionLibrary.h"
+#include "WarriorGameplayTags.h"
 #include "WarriorDebugHelper.h"
 
 UWarriorAttributeSet::UWarriorAttributeSet()
@@ -41,9 +43,12 @@ void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffec
 			DamageDone,
 			NewCurrentHealth);
 		Debug::Print(DebugString, FColor::Green);
+
 		if (NewCurrentHealth == 0.f)
 		{
-
+			UWarriorFunctionLibrary::AddGameplayTagToActorIfNode(
+				Data.Target.GetAvatarActor(),
+				WarriorGameplayTags::Shared_Status_Dead);
 		}
 	}
 }
