@@ -7,6 +7,8 @@
 #include "WarriorEnemyCharacter.generated.h"
 
 class UEnemyCombatComponent;
+class UEnemyUIComponent;
+
 /**
  * 
  */
@@ -20,7 +22,11 @@ public:
 	// ~Begin IPawnCombatInterface Interface.
 	virtual UPawnCombatComponent* GetPawnCombatComponent() const override;
 	// ~End IPawnCombatInterface Interface.
-
+	// 
+	// ~Begin IPawnUIInterface Interface.
+	virtual UPawnUIComponent* GetPawnUIComponent() const override;
+	// ~End IPawnUIInterface Interface.
+	
 	FORCEINLINE  UEnemyCombatComponent* GetEnemyCombatComponent() const
 	{
 		return EnemyCombatComponentPtr;
@@ -35,7 +41,9 @@ private:
 	void InitEnemyStartUpData();
 
 protected:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat", meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Combat")
 	UEnemyCombatComponent* EnemyCombatComponentPtr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	UEnemyUIComponent* EnemyUIComponent;
 };
