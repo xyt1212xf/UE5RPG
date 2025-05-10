@@ -36,6 +36,11 @@ UPawnCombatComponent* AWarriorEnemyCharacter::GetPawnCombatComponent() const
 
 UPawnUIComponent* AWarriorEnemyCharacter::GetPawnUIComponent() const
 {
+	return GetEnemyUIComponent();
+}
+
+UEnemyUIComponent* AWarriorEnemyCharacter::GetEnemyUIComponent() const
+{
 	return EnemyUIComponent;
 }
 

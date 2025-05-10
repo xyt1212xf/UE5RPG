@@ -50,6 +50,11 @@ UPawnCombatComponent* AWarriorHeroCharacter::GetPawnCombatComponent() const
 
 UPawnUIComponent* AWarriorHeroCharacter::GetPawnUIComponent() const
 {
+	return GetHeroUIComponent();
+}
+
+UHeroUIComponent* AWarriorHeroCharacter::GetHeroUIComponent() const
+{
 	return HeroUIComponent;
 }
 
