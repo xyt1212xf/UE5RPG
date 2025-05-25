@@ -23,6 +23,8 @@ public:
 	// ~End IGenericTeamAgentInterface Interface.
 
 protected:
+	virtual void BeginPlay() override;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	UAIPerceptionComponent* EnemyPerceptionComponent;
 	
@@ -31,4 +33,14 @@ protected:
 
 	UFUNCTION()
 	virtual void OnEnemyPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+private:
+	UPROPERTY(EditdefaultsOnly, Category = "Detour Crowd Avoidance Config")
+	bool bEnableDetourCrowdAvoidance = true;
+
+	UPROPERTY(EditdefaultsOnly, Category = "Detour Crowd Avoidance Config", meta = (EditConditon="bEnableDetourCrowdAvoidance", UIMin="1", UIMax="4"))
+	int32 DetourCrowdAvoidanceQuality = 4;
+
+	UPROPERTY(EditdefaultsOnly, Category = "Detour Crowd Avoidance Config", meta = (EditConditon="bEnableDetourCrowdAvoidance"))
+	float CollisionQueryRange = 600.f;
 };
