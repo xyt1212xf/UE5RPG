@@ -22,6 +22,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Warrior|Ability", meta = (AppleLevel = "1"))
 	void GrantHeroWeaponAbilities(const TArray<FWarriorHeroAbilitySet>& InDefaultWeaponAbilities, TArray<FGameplayAbilitySpecHandle>& OutGrantedAbilitySpecHandles, int32 ApplyLevel);
 	
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Warrior|Ability")
 	void RemoveGrantHeroWeaponAbilities(UPARAM(ref) TArray<FGameplayAbilitySpecHandle>& InSpecHandlesRemove);
+
+	bool TryActivateAbilitiesByTag(FGameplayTag AbilityTagToActivate);
 };
