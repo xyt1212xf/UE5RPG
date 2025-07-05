@@ -5,6 +5,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/WarriorAbilitySystemComponent.h"
 #include "Interfaces/PawnCombatInterface.h"
+#include "GenericTeamAgentInterface.h"
 
 UWarriorAbilitySystemComponent* UWarriorFunctionLibrary::NativeGetWarriorASCFromActor(AActor* InActor)
 {
@@ -56,4 +57,17 @@ UPawnCombatComponent* UWarriorFunctionLibrary::BP_GetPawnCombatComponent(AActor*
 	UPawnCombatComponent* PawnCombatComponet = NativeGetPawnCombatComponent(InActor);
 	OutValidType = PawnCombatComponet ? EWarriorValidType::Valid : EWarriorValidType::Invalid;
 	return PawnCombatComponet;
+}
+
+bool UWarriorFunctionLibrary::IsTargetPawnHotile(APawn* QueryPawn, APawn* TargetPawn)
+{
+	check(QueryPawn && TargetPawn);
+
+	IGenericTeamAgentInterface* QueryTeamAgentPtr =  Cast<IGenericTeamAgentInterface>(QueryPawn->GetController());
+	IGenericTeamAgentInterface* TargetTeamAgentPtr =  Cast<IGenericTeamAgentInterface>(TargetPawn->GetController());
+	if (QueryTeamAgentPtr && TargetTeamAgentPtr)
+	{
+		return QueryTeamAgentPtr->GetGenericTeamId() != TargetTeamAgentPtr->GetGenericTeamId();
+	}
+	return false;
 }

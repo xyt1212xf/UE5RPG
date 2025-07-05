@@ -35,4 +35,7 @@ public:
 	static UPawnCombatComponent* NativeGetPawnCombatComponent(AActor* InActor);
 	UFUNCTION(BlueprintCallable, Category = "Warrior|FunctionLibrary", meta = (DisplayName = "GetPawnCombatComponent", ExpandEnumAsExecs = "OutValidType"))
 	static UPawnCombatComponent* BP_GetPawnCombatComponent(AActor* InActor, EWarriorValidType& OutValidType);
+
+	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
+	static bool IsTargetPawnHotile(APawn* QueryPawn, APawn* TargetPawn);
 };
