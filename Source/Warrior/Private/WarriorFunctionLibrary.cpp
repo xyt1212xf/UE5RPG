@@ -7,7 +7,7 @@
 #include "Interfaces/PawnCombatInterface.h"
 #include "GenericTeamAgentInterface.h"
 #include "kismet/KismetMathLibrary.h"
-
+#include "WarriorGameplayTags.h"
 
 UWarriorAbilitySystemComponent* UWarriorFunctionLibrary::NativeGetWarriorASCFromActor(AActor* InActor)
 {
@@ -86,8 +86,28 @@ FGameplayTag UWarriorFunctionLibrary::ComputeHitReactDirectionTag(AActor* InAtta
 	const FVector VictimToAttacterNormalized = (InAttacker->GetActorLocation() - InVictim->GetActorLocation()).GetSafeNormal();
 	const float DotResult = FVector::DotProduct(VictimForward, VictimToAttacterNormalized);
 	OutAngleDifference = UKismetMathLibrary::DegAcos(DotResult);
-
-	return FGameplayTag();
+	const FVector CrossResult = FVector::CrossProduct(VictimForward, VictimToAttacterNormalized);
+	if (CrossResult.Z < 0.f)
+	{
+		OutAngleDifference = -OutAngleDifference;
+	}
+	if (OutAngleDifference >= -45.f && OutAngleDifference <= 45.f)
+	{
+		return WarriorGameplayTags::Shared_Status_HitReact_Front;
+	}
+	else if (OutAngleDifference < -45.f && OutAngleDifference >= -135.f)
+	{
+		return WarriorGameplayTags::Shared_Status_HitReact_Left;
+	}
+	else if (OutAngleDifference < -135.f || OutAngleDifference > 135.f)
+	{
+		return WarriorGameplayTags::Shared_Status_HitReact_Back;
+	}
+	else if (OutAngleDifference > 45.f && OutAngleDifference <= 135.f)
+	{
+		return WarriorGameplayTags::Shared_Status_HitReact_Right;
+	}
+	return WarriorGameplayTags::Shared_Status_HitReact_Front;
 }
 
 
