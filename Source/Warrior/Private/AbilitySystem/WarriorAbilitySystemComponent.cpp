@@ -19,9 +19,10 @@ void UWarriorAbilitySystemComponent::OnAbilityInputPressed(const FGameplayTag& I
 	}
 }
 
+
 void UWarriorAbilitySystemComponent::OnAbilityInputReleased(const FGameplayTag& InInputTag)
 {
-	if (!InInputTag.IsValid() || InInputTag.MatchesTag(WarriorGameplayTags::InputTag_MustBeHeld))
+	if (!InInputTag.IsValid() || !InInputTag.MatchesTag(WarriorGameplayTags::InputTag_MustBeHeld))
 	{
 		return;
 	}
