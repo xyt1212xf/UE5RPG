@@ -25,9 +25,10 @@ private:
 	void CancelTargetLockAbility();
 	void CleanUp();
 	void DrawTargetLockWidget();
+	void SetTargetLockWidgetPosition();
 
 	AActor* GetNearestTargetFromAvailableActors(const TArray<AActor*>& InAvailableActors);
-
+		
 	UPROPERTY(EditDefaultsOnly, Category = "Target Lock")
 	float BoxTraceDistance = 5000.f;
 	
@@ -48,6 +49,9 @@ private:
 	
 	UPROPERTY()
 	UWarriorWidgetBase* DrawnTargetLockWidget;
+
+	UPROPERTY()
+	FVector2D TargetLockWidgetSize = FVector2D::ZeroVector;
 
 	UPROPERTY()
 	AActor* CurrentLockedActor;

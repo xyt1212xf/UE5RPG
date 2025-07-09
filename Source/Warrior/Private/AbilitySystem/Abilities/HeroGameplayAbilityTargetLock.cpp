@@ -7,6 +7,9 @@
 #include "Characters/WarriorHeroCharacter.h"
 #include "Controllers/WarriorHeroController.h"
 #include "Widgets/WarriorWidgetBase.h"
+#include "Blueprint/WidgetLayoutLibrary.h"
+#include "Blueprint/WidgetTree.h"
+#include "Components/SizeBox.h"
 
 void UHeroGameplayAbilityTargetLock::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
@@ -32,6 +35,8 @@ void UHeroGameplayAbilityTargetLock::TryLockOnTarget()
 	if (CurrentLockedActor)
 	{
 		DrawTargetLockWidget();
+		SetTargetLockWidgetPosition();
+
 	}
 	else
 	{
@@ -94,6 +99,36 @@ void UHeroGameplayAbilityTargetLock::DrawTargetLockWidget()
 		check(DrawnTargetLockWidget);
 		DrawnTargetLockWidget->AddToViewport();
 	}
+}
+
+void UHeroGameplayAbilityTargetLock::SetTargetLockWidgetPosition()
+{
+	if (!CurrentLockedActor || !DrawnTargetLockWidget)
+	{
+		CancelTargetLockAbility();
+		return;
+	}
+	FVector2D ScreenPosition;
+	UWidgetLayoutLibrary::ProjectWorldLocationToWidgetPosition(
+		GetHeroControllerFromActorInfo(),
+		CurrentLockedActor->GetActorLocation(),
+		ScreenPosition,
+		true);
+	if (TargetLockWidgetSize == FVector2D::ZeroVector)
+	{
+		DrawnTargetLockWidget->WidgetTree->ForEachWidget(
+			[this](UWidget* FoundWidget)
+			{
+				if (USizeBox* FoundSizeBox = Cast<USizeBox>(FoundWidget))
+				{
+					TargetLockWidgetSize.X = FoundSizeBox->GetWidthOverride();
+					TargetLockWidgetSize.Y = FoundSizeBox->GetHeightOverride();
+				}
+			}
+		);
+	}
+	ScreenPosition -= TargetLockWidgetSize * 0.5f;
+	DrawnTargetLockWidget->SetPositionInViewport(ScreenPosition, false);
 }
 
 AActor* UHeroGameplayAbilityTargetLock::GetNearestTargetFromAvailableActors(const TArray<AActor*>& InAvailableActors)
