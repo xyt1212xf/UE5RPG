@@ -5,6 +5,8 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "Characters/WarriorHeroCharacter.h"
+#include "Controllers/WarriorHeroController.h"
+#include "Widgets/WarriorWidgetBase.h"
 
 void UHeroGameplayAbilityTargetLock::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
@@ -27,7 +29,11 @@ void UHeroGameplayAbilityTargetLock::TryLockOnTarget()
 		return;
 	}
 	CurrentLockedActor = GetNearestTargetFromAvailableActors(AvailableActorsToLock);
-	if (nullptr == CurrentLockedActor)
+	if (CurrentLockedActor)
+	{
+		DrawTargetLockWidget();
+	}
+	else
 	{
 		CancelTargetLockAbility();
 	}
@@ -73,6 +79,21 @@ void UHeroGameplayAbilityTargetLock::CleanUp()
 {
 	AvailableActorsToLock.Reset();
 	CurrentLockedActor = nullptr;
+	if (DrawnTargetLockWidget)
+	{
+		DrawnTargetLockWidget->RemoveFromParent();
+	}
+}
+
+void UHeroGameplayAbilityTargetLock::DrawTargetLockWidget()
+{
+	if (nullptr == DrawnTargetLockWidget)
+	{
+		checkf(TargetLockWidgetClass, TEXT("Forgot to assign a valid widget class in blueprint"));
+		DrawnTargetLockWidget = CreateWidget<UWarriorWidgetBase>(GetHeroControllerFromActorInfo(), TargetLockWidgetClass);
+		check(DrawnTargetLockWidget);
+		DrawnTargetLockWidget->AddToViewport();
+	}
 }
 
 AActor* UHeroGameplayAbilityTargetLock::GetNearestTargetFromAvailableActors(const TArray<AActor*>& InAvailableActors)
