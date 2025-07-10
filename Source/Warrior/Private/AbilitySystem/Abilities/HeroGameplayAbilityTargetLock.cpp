@@ -10,6 +10,10 @@
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Blueprint/WidgetTree.h"
 #include "Components/SizeBox.h"
+#include "WarriorFunctionLibrary.h"
+#include "WarriorGameplayTags.h"
+#include "Kismet/KismetMathLibrary.h"
+
 
 void UHeroGameplayAbilityTargetLock::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
@@ -21,6 +25,28 @@ void UHeroGameplayAbilityTargetLock::EndAbility(const FGameplayAbilitySpecHandle
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 	CleanUp();
+}
+
+void UHeroGameplayAbilityTargetLock::OnTargetLockTick(float DeltaTime)
+{
+	if (!CurrentLockedActor ||
+		UWarriorFunctionLibrary::NativeDoesActorHaveTag(CurrentLockedActor, WarriorGameplayTags::Shared_Status_Dead) ||
+		UWarriorFunctionLibrary::NativeDoesActorHaveTag(GetHeroCharacterFromActorInfo(), WarriorGameplayTags::Shared_Status_Dead))
+	{
+		CancelTargetLockAbility();
+		return;
+	}
+	SetTargetLockWidgetPosition();
+	const bool bShouldOverrideRotation = !UWarriorFunctionLibrary::NativeDoesActorHaveTag(GetHeroCharacterFromActorInfo(), WarriorGameplayTags::Player_Status_Rolling)
+		&& !UWarriorFunctionLibrary::NativeDoesActorHaveTag(GetHeroCharacterFromActorInfo(), WarriorGameplayTags::Player_Status_Blocking);
+	if (bShouldOverrideRotation)
+	{
+		const FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(GetHeroCharacterFromActorInfo()->GetActorLocation(), CurrentLockedActor->GetActorLocation());
+		const FRotator CurrentControlRot = GetHeroControllerFromActorInfo()->GetControlRotation();
+		const FRotator TargetRot = FMath::RInterpTo(CurrentControlRot, LookAtRot, DeltaTime, TargetLockRotationInterpSpeed);
+		GetHeroControllerFromActorInfo()->SetControlRotation(FRotator(TargetRot.Pitch, TargetRot.Yaw, 0.f));
+		GetHeroCharacterFromActorInfo()->SetActorRotation(FRotator(0.f, TargetRot.Yaw, 0.f));
+	}
 }
 
 void UHeroGameplayAbilityTargetLock::TryLockOnTarget()
@@ -88,6 +114,8 @@ void UHeroGameplayAbilityTargetLock::CleanUp()
 	{
 		DrawnTargetLockWidget->RemoveFromParent();
 	}
+	DrawnTargetLockWidget = nullptr;
+	TargetLockWidgetSize = FVector2D::ZeroVector;
 }
 
 void UHeroGameplayAbilityTargetLock::DrawTargetLockWidget()
