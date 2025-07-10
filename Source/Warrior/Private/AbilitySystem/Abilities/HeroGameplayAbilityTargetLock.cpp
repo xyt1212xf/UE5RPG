@@ -13,18 +13,25 @@
 #include "WarriorFunctionLibrary.h"
 #include "WarriorGameplayTags.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "EnhancedInputSubsystems.h"
+
 
 
 void UHeroGameplayAbilityTargetLock::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	TryLockOnTarget();
+	InitTargetLockMovement();
+	InitTargetLockMappingContext();
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
 void UHeroGameplayAbilityTargetLock::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+	ResetTargetLockMovement();
+	ResetTargetLockMappingContext();
 	CleanUp();
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }
 
 void UHeroGameplayAbilityTargetLock::OnTargetLockTick(float DeltaTime)
@@ -41,11 +48,65 @@ void UHeroGameplayAbilityTargetLock::OnTargetLockTick(float DeltaTime)
 		&& !UWarriorFunctionLibrary::NativeDoesActorHaveTag(GetHeroCharacterFromActorInfo(), WarriorGameplayTags::Player_Status_Blocking);
 	if (bShouldOverrideRotation)
 	{
-		const FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(GetHeroCharacterFromActorInfo()->GetActorLocation(), CurrentLockedActor->GetActorLocation());
+		FRotator LookAtRot = UKismetMathLibrary::FindLookAtRotation(GetHeroCharacterFromActorInfo()->GetActorLocation(), CurrentLockedActor->GetActorLocation());
 		const FRotator CurrentControlRot = GetHeroControllerFromActorInfo()->GetControlRotation();
+		LookAtRot -= FRotator(TargetLockCameraOffsetDistance, 0.f, 0.f);
+
 		const FRotator TargetRot = FMath::RInterpTo(CurrentControlRot, LookAtRot, DeltaTime, TargetLockRotationInterpSpeed);
 		GetHeroControllerFromActorInfo()->SetControlRotation(FRotator(TargetRot.Pitch, TargetRot.Yaw, 0.f));
 		GetHeroCharacterFromActorInfo()->SetActorRotation(FRotator(0.f, TargetRot.Yaw, 0.f));
+	}
+}
+
+void UHeroGameplayAbilityTargetLock::SwitchTarget(const FGameplayTag& InSwitchDirectionTag)
+{
+	GetAvailableActorsToLock();
+	TArray<AActor*> ActorsOnLeft;
+	TArray<AActor*> ActorsOnRight;
+	AActor* NewTargetToLock = nullptr;
+
+	GetAvailableActorsAroundTarget(ActorsOnLeft, ActorsOnRight);
+	if (InSwitchDirectionTag == WarriorGameplayTags::Player_Event_SwitchTarget_Left)
+	{
+		NewTargetToLock = GetNearestTargetFromAvailableActors(ActorsOnLeft);
+	}
+	else
+	{
+		NewTargetToLock = GetNearestTargetFromAvailableActors(ActorsOnRight);
+	}
+	if (NewTargetToLock)
+	{
+		CurrentLockedActor = NewTargetToLock;
+	}
+}
+
+void UHeroGameplayAbilityTargetLock::GetAvailableActorsAroundTarget(TArray<AActor*>& OutActorsOnLeft, TArray<AActor*>& OutActorsOnRight)
+{
+	if (!CurrentLockedActor || AvailableActorsToLock.IsEmpty())
+	{
+		return;
+	}
+	const FVector PlayerLocation = GetHeroCharacterFromActorInfo()->GetActorLocation();
+
+	const FVector PlayerToCurrentNormalized = (CurrentLockedActor->GetActorLocation() - PlayerLocation).GetSafeNormal();
+
+	for (AActor* AvailableActor : AvailableActorsToLock)
+	{
+		if (!AvailableActor || AvailableActor == CurrentLockedActor)
+		{
+			continue;
+		}
+
+		const FVector PlayerToAvailableNormalized = (AvailableActor->GetActorLocation() - PlayerLocation).GetSafeNormal();
+		const FVector CrossResult = FVector::CrossProduct(PlayerToCurrentNormalized, PlayerToAvailableNormalized);
+		if (CrossResult.Z > 0 )
+		{
+			OutActorsOnLeft.AddUnique(AvailableActor);
+		}
+		else
+		{
+			OutActorsOnRight.AddUnique(AvailableActor);
+		}
 	}
 }
 
@@ -72,6 +133,7 @@ void UHeroGameplayAbilityTargetLock::TryLockOnTarget()
 
 void UHeroGameplayAbilityTargetLock::GetAvailableActorsToLock()
 {
+	AvailableActorsToLock.Reset();
 	TArray<FHitResult> BoxTraceHits;
 
 	UKismetSystemLibrary::BoxTraceMultiForObjects(
@@ -116,6 +178,7 @@ void UHeroGameplayAbilityTargetLock::CleanUp()
 	}
 	DrawnTargetLockWidget = nullptr;
 	TargetLockWidgetSize = FVector2D::ZeroVector;
+	CachedDefaultMaxWalkSpeed = 0.f;
 }
 
 void UHeroGameplayAbilityTargetLock::DrawTargetLockWidget()
@@ -157,6 +220,40 @@ void UHeroGameplayAbilityTargetLock::SetTargetLockWidgetPosition()
 	}
 	ScreenPosition -= TargetLockWidgetSize * 0.5f;
 	DrawnTargetLockWidget->SetPositionInViewport(ScreenPosition, false);
+}
+
+void UHeroGameplayAbilityTargetLock::InitTargetLockMovement()
+{
+	CachedDefaultMaxWalkSpeed = GetHeroCharacterFromActorInfo()->GetCharacterMovement()->MaxWalkSpeed;
+	GetHeroCharacterFromActorInfo()->GetCharacterMovement()->MaxWalkSpeed = TargetLockMaxWalkSpeed;
+}
+
+void UHeroGameplayAbilityTargetLock::ResetTargetLockMovement()
+{
+	if (CachedDefaultMaxWalkSpeed > 0.f)
+	{
+		GetHeroCharacterFromActorInfo()->GetCharacterMovement()->MaxWalkSpeed = CachedDefaultMaxWalkSpeed;
+	}
+}
+
+void UHeroGameplayAbilityTargetLock::InitTargetLockMappingContext()
+{
+	const ULocalPlayer* LocalPlayerPtr = GetHeroControllerFromActorInfo()->GetLocalPlayer();
+	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayerPtr);
+	check(SubSystem);
+	SubSystem->AddMappingContext(TargetLockMappingContext, 3);
+}
+
+void UHeroGameplayAbilityTargetLock::ResetTargetLockMappingContext()
+{
+	if (nullptr == GetHeroControllerFromActorInfo())
+	{
+		return;
+	}
+	const ULocalPlayer* LocalPlayerPtr = GetHeroControllerFromActorInfo()->GetLocalPlayer();
+	UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayerPtr);
+	check(SubSystem);
+	SubSystem->RemoveMappingContext(TargetLockMappingContext);
 }
 
 AActor* UHeroGameplayAbilityTargetLock::GetNearestTargetFromAvailableActors(const TArray<AActor*>& InAvailableActors)
