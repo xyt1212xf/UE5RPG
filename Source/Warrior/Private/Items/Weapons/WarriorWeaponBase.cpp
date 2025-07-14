@@ -30,7 +30,7 @@ void AWarriorWeaponBase::OnCollisionBoxBeginOverlap(UPrimitiveComponent* Overlap
 
 	if (APawn* HitPawn = Cast<APawn>(OtherActor))
 	{
-		if (UWarriorFunctionLibrary::IsTargetPawnHotile(WeaponOwningPawn, HitPawn))
+		if (UWarriorFunctionLibrary::IsTargetPawnHostile(WeaponOwningPawn, HitPawn))
 		{
 			OnWeaponHitTarget.ExecuteIfBound(HitPawn);
 		}

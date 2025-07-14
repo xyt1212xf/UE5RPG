@@ -39,7 +39,7 @@ public:
 	static UPawnCombatComponent* BP_GetPawnCombatComponent(AActor* InActor, EWarriorValidType& OutValidType);
 
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
-	static bool IsTargetPawnHotile(APawn* QueryPawn, APawn* TargetPawn);
+	static bool IsTargetPawnHostile(APawn* QueryPawn, APawn* TargetPawn);
 
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary", meta = (CompactNodeTitle = "Get Value At Level"))
 	static float GetScalableFloatValueAtLevel(const FScalableFloat& InScalableFloat, float InLevle = 1.f);
@@ -49,4 +49,8 @@ public:
 	
 	UFUNCTION(BlueprintPure, Category = "Warrior|FunctionLibrary")
 	static bool IsValidBlock(AActor* InAttacker, AActor* InDefender);
+
+
+	UFUNCTION(BlueprintCallable, Category = "Warrior|FunctionLibrary")
+	static bool ApplyGameplayEffectSpecHandleToTargetActor(AActor* InInstigator, AActor* InTargetActor, const FGameplayEffectSpecHandle& InSpecHandle);
 };
