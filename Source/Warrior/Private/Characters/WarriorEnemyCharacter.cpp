@@ -9,6 +9,8 @@
 #include "DataAssets/StartUpData/DataAsset_EnemyStartUpData.h"
 #include "Components/WidgetComponent.h"
 #include "Widgets/WarriorWidgetBase.h"
+#include "Components/BoxComponent.h"
+#include "WarriorFunctionLibrary.h"
 
 #include "WarriorDebugHelper.h"
 
@@ -34,6 +36,16 @@ AWarriorEnemyCharacter::AWarriorEnemyCharacter()
 	EnemyHealthWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("EnemyHealthWidgetComponent"));
 
 	EnemyHealthWidgetComponent->SetupAttachment(GetMesh());
+
+	LeftHandCollisionBoxPtr = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftHandCollisionBoxPtr"));
+	LeftHandCollisionBoxPtr->SetupAttachment(GetMesh());
+	LeftHandCollisionBoxPtr->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	LeftHandCollisionBoxPtr->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnBodyCollisionBoxBeginOverlap);
+
+	RightHandCollisionBoxPtr = CreateDefaultSubobject<UBoxComponent>(TEXT("RightHandCollisionBoxPtr"));
+	RightHandCollisionBoxPtr->SetupAttachment(GetMesh());
+	RightHandCollisionBoxPtr->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	RightHandCollisionBoxPtr->OnComponentBeginOverlap.AddUniqueDynamic(this, &ThisClass::OnBodyCollisionBoxBeginOverlap);
 }
 
 UPawnCombatComponent* AWarriorEnemyCharacter::GetPawnCombatComponent() const
@@ -66,6 +78,32 @@ void AWarriorEnemyCharacter::PossessedBy(AController* NewController)
 	InitEnemyStartUpData();
 
 }
+
+void AWarriorEnemyCharacter::OnBodyCollisionBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (APawn* HitPawn = Cast<APawn>(OtherActor))
+	{
+		if (UWarriorFunctionLibrary::IsTargetPawnHostile(this, HitPawn))
+		{
+			EnemyCombatComponentPtr->OnHitTargetActor(HitPawn);
+		}
+	}
+}
+
+#if WITH_EDITOR
+void AWarriorEnemyCharacter::PostEditChangeChainProperty(struct FPropertyChangedChainEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeChainProperty(PropertyChangedEvent);
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, LeftHandCollisionBoxAttachBoneName))
+	{
+		LeftHandCollisionBoxPtr->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, LeftHandCollisionBoxAttachBoneName);
+	}
+	if (PropertyChangedEvent.GetMemberPropertyName() == GET_MEMBER_NAME_CHECKED(ThisClass, RightHandCollisionBoxAttachBoneName))
+	{
+		RightHandCollisionBoxPtr->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, RightHandCollisionBoxAttachBoneName);
+	}
+} 
+#endif
 
 void AWarriorEnemyCharacter::InitEnemyStartUpData()
 {

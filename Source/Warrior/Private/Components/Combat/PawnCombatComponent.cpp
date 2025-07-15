@@ -47,30 +47,11 @@ void UPawnCombatComponent::ToggleWeaponCollision(bool bShouldEanble, EToggleWeap
 {
 	if (EToggleWeaponType::CurrentWeapon == InToggleWeaponType)
 	{
-		AWarriorWeaponBase* WeaponToToggle = GetCharacterCurrentEquippedWeapon();
-		check(WeaponToToggle);
-		if (bShouldEanble)
-		{
-			WeaponToToggle->GetWeaponCollisionBoxPtr()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-		}
-		else
-		{
-			WeaponToToggle->GetWeaponCollisionBoxPtr()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-			OverlappedActors.Empty();
-		}
-
-	}
-	else if (EToggleWeaponType::LeftHand == InToggleWeaponType)
-	{
-	
-	}
-	else if (EToggleWeaponType::RightHand == InToggleWeaponType)
-	{
-	
+		ToggleCurrentEquippedWeaponCollision(bShouldEanble);
 	}
 	else
 	{
-		checkf(false, TEXT("Invalid toggle weapon type"));
+		ToggleBodyCollisionBoxCollision(bShouldEanble, InToggleWeaponType);
 	}
 }
 
@@ -80,4 +61,24 @@ void UPawnCombatComponent::OnHitTargetActor(AActor* HitActor)
 
 void UPawnCombatComponent::OnWeaponPulledFromTargetActor(AActor* InteractedActor)
 {
+}
+
+void UPawnCombatComponent::ToggleCurrentEquippedWeaponCollision(bool bShouldEanble)
+{
+	AWarriorWeaponBase* WeaponToToggle = GetCharacterCurrentEquippedWeapon();
+	check(WeaponToToggle);
+	if (bShouldEanble)
+	{
+		WeaponToToggle->GetWeaponCollisionBoxPtr()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	}
+	else
+	{
+		WeaponToToggle->GetWeaponCollisionBoxPtr()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		OverlappedActors.Empty();
+	}
+}
+
+void UPawnCombatComponent::ToggleBodyCollisionBoxCollision(bool bShouldEanble, EToggleWeaponType InToggleWeaponType)
+{
+
 }
