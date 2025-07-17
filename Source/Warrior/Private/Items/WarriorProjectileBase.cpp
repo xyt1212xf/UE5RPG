@@ -82,7 +82,21 @@ void AWarriorProjectileBase::OnProjectileHit(UPrimitiveComponent* HitComponent, 
 
 void AWarriorProjectileBase::OnProjectileBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
+	if (OverlappedActors.Contains(OtherActor))
+	{
+		return;
+	}
+	OverlappedActors.Add(OtherActor);
+	if (APawn* HitPawn = Cast<APawn>(OtherActor))
+	{
+		if (UWarriorFunctionLibrary::IsTargetPawnHostile(GetInstigator(), HitPawn))
+		{
+			FGameplayEventData Data;
+			Data.Instigator = GetInstigator();
+			Data.Target = HitPawn;
+			HandleApplyProjectileDamage(HitPawn, Data);
+		}
+	}
 }
 
 void AWarriorProjectileBase::HandleApplyProjectileDamage(APawn* InHitPawn, const FGameplayEventData& InPayload)

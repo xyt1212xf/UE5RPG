@@ -59,4 +59,7 @@ protected:
 	void BP_OnSpawnProjectileHitFX(const FVector& HitLocation);
 private:
 	void HandleApplyProjectileDamage(APawn* HitPawn, const FGameplayEventData& InPayload);
+
+private:
+	TArray<AActor*>	OverlappedActors;
 };
