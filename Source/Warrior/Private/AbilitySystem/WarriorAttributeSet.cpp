@@ -41,7 +41,22 @@ void UWarriorAttributeSet::PostGameplayEffectExecute(const struct FGameplayEffec
 	if (Data.EvaluatedData.Attribute == GetCurrentRageAttribute())
 	{
 		const float NewCurrentRage = FMath::Clamp(GetCurrentRage(), 0.f, GetMaxRage());
-		SetCurrentHealth(NewCurrentRage);
+		SetCurrentRage(NewCurrentRage);
+
+		if (GetCurrentRage() == GetMaxRage())
+		{
+			UWarriorFunctionLibrary::AddGameplayTagToActorIfNode(Data.Target.GetAvatarActor(), WarriorGameplayTags::Player_Status_Rage_Full);
+		}
+		else if(GetCurrentRage() == 0.f)
+		{
+			UWarriorFunctionLibrary::AddGameplayTagToActorIfNode(Data.Target.GetAvatarActor(), WarriorGameplayTags::Player_Status_Rage_None);
+		}
+		else
+		{
+			UWarriorFunctionLibrary::RemoveGameplayTagToActorIfNode(Data.Target.GetAvatarActor(), WarriorGameplayTags::Player_Status_Rage_Full);
+			UWarriorFunctionLibrary::RemoveGameplayTagToActorIfNode(Data.Target.GetAvatarActor(), WarriorGameplayTags::Player_Status_Rage_None);
+		}
+
 		if (auto HerUIComponent = CachedPawnUIInterface->GetHeroUIComponent())
 		{
 			HerUIComponent->OnCurrentRageChanged.Broadcast(GetCurrentRage() / GetMaxRage());
