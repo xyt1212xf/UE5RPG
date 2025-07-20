@@ -88,7 +88,8 @@ void AWarriorHeroCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	
 	WarriorInoutComonent->BindNativeInputAction(InputConfigDataAssetPtr, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Triggered, this,&ThisClass::Input_SwitchTargetTriggered);
 	WarriorInoutComonent->BindNativeInputAction(InputConfigDataAssetPtr, WarriorGameplayTags::InputTag_SwitchTarget, ETriggerEvent::Completed, this,&ThisClass::Input_SwitchTargetCompleted);
-	
+	WarriorInoutComonent->BindNativeInputAction(InputConfigDataAssetPtr, WarriorGameplayTags::InputTag_PickUp_Stones, ETriggerEvent::Started, this, &ThisClass::Input_PickUpStonesStared);
+
 	WarriorInoutComonent->BindAbilityInputAction(InputConfigDataAssetPtr, this, &ThisClass::Input_AbilityInputPressed, &ThisClass::Input_AbilityInputReleased);
 
 }
@@ -134,6 +135,15 @@ void AWarriorHeroCharacter::Input_SwitchTargetCompleted(const FInputActionValue&
 	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
 		this,
 		SwitchDirection.X > 0.f ? WarriorGameplayTags::Player_Event_SwitchTarget_Left : WarriorGameplayTags::Player_Event_SwitchTarget_Right,
+		Data);
+}
+
+void AWarriorHeroCharacter::Input_PickUpStonesStared(const FInputActionValue& InputActionValue)
+{
+	FGameplayEventData Data;
+	UAbilitySystemBlueprintLibrary::SendGameplayEventToActor(
+		this,
+		WarriorGameplayTags::Player_Event_ConsumeStones,
 		Data);
 }
 
