@@ -93,7 +93,7 @@ void UWarriorAbilitySystemComponent::RemoveGrantHeroWeaponAbilities(UPARAM(ref)T
 	InSpecHandlesRemove.Empty();
 }
 
-bool UWarriorAbilitySystemComponent::TryActivateAbilitiesByTag(FGameplayTag AbilityTagToActivate)
+bool UWarriorAbilitySystemComponent::TryActivateAbilityByTag(FGameplayTag AbilityTagToActivate, bool bAllowRemoteActivation /*= true*/)
 {
 	check(AbilityTagToActivate.IsValid());
 	TArray<FGameplayAbilitySpec*> FoundAbilitySpecs;
@@ -111,4 +111,5 @@ bool UWarriorAbilitySystemComponent::TryActivateAbilitiesByTag(FGameplayTag Abil
 	}
 	return false;
 }
+
 

@@ -22,6 +22,6 @@ void AWarriorStoneBase::OnPickUpCollisionSphereBeginOverlap(UPrimitiveComponent*
 {
 	if (AWarriorHeroCharacter* OverlappedHeroCharacter = Cast<AWarriorHeroCharacter>(OtherActor))
 	{
-		OverlappedHeroCharacter->GetWarriorAbilitySystemComponent()->TryActivateAbilitiesByTag(WarriorGameplayTags::Player_Ability_PickUp_Stones);
+		OverlappedHeroCharacter->GetWarriorAbilitySystemComponent()->TryActivateAbilityByTag(WarriorGameplayTags::Player_Ability_PickUp_Stones);
 	}
 }
