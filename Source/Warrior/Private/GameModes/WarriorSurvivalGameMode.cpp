@@ -2,6 +2,11 @@
 
 
 #include "GameModes/WarriorSurvivalGameMode.h"
+#include "Engine/AssetManager.h"
+#include "Characters/WarriorEnemyCharacter.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/TargetPoint.h"
+#include "NavigationSystem.h"
 
 void AWarriorSurvivalGameMode::BeginPlay()
 {
@@ -9,6 +14,7 @@ void AWarriorSurvivalGameMode::BeginPlay()
 	checkf(EnemyWaveSpawnerDataTable, TEXT("Forgot t assign a valid data table in survival game mode blueprint"));
 	SetCurrentSurvivalGameModeState(EWarriorSurvivalGameModeState::WaitSpawnNewWave);
 	TotalWavesToSpawn = EnemyWaveSpawnerDataTable->GetRowNames().Num();
+	PreLoadNextWaveEnemies();
 }
 
 void AWarriorSurvivalGameMode::Tick(float DeltaTime)
@@ -28,7 +34,7 @@ void AWarriorSurvivalGameMode::Tick(float DeltaTime)
 		TimePassedSinceStart += DeltaTime;
 		if (TimePassedSinceStart >= SpawnEnemiesDalayTime)
 		{
-			//TODO:
+			CurrentSpawnedEnemiesCounter += TrySpawnWaveEnemies();
 			TimePassedSinceStart = 0.f;
 			SetCurrentSurvivalGameModeState(EWarriorSurvivalGameModeState::InProgress);
 		}
@@ -49,6 +55,7 @@ void AWarriorSurvivalGameMode::Tick(float DeltaTime)
 			else
 			{
 				SetCurrentSurvivalGameModeState(EWarriorSurvivalGameModeState::WaitSpawnNewWave);
+				PreLoadNextWaveEnemies();
 			}
 		}
 	}
@@ -63,4 +70,88 @@ void AWarriorSurvivalGameMode::SetCurrentSurvivalGameModeState(EWarriorSurvivalG
 bool AWarriorSurvivalGameMode::HasFinishedAllWaves() const
 {
 	return CurrentWaveCount > TotalWavesToSpawn;
+}
+
+void AWarriorSurvivalGameMode::PreLoadNextWaveEnemies()
+{
+	if (HasFinishedAllWaves())
+	{
+		return;
+	}
+	FWarriorEnemyWaveSpawnerTableRow* spawnerTableRowPtr = GetCurrentWaveSpawnerTableRow();
+	for (const FWarriorEnumWaveSpawnerInfo& SpawnerInfo : spawnerTableRowPtr->EnemyWaveSpawnDefinitions)
+	{
+		if (SpawnerInfo.SoftEnemyClassToSpawn.IsNull())
+		{
+			continue;
+		}
+		UAssetManager::GetStreamableManager().RequestAsyncLoad(
+			SpawnerInfo.SoftEnemyClassToSpawn.ToSoftObjectPath(),
+			FStreamableDelegate::CreateLambda(
+				[&SpawnerInfo, this]()
+				{
+					if (UClass* LoadedEnemyClass = SpawnerInfo.SoftEnemyClassToSpawn.Get())
+					{
+						PreLoadedEnemyClassMap.Emplace(SpawnerInfo.SoftEnemyClassToSpawn, LoadedEnemyClass);
+					}
+				}
+			)
+		);
+	}
+}
+
+int32 AWarriorSurvivalGameMode::TrySpawnWaveEnemies()
+{
+	if (TargetPointsArray.IsEmpty())
+	{
+		UGameplayStatics::GetAllActorsOfClass(this, ATargetPoint::StaticClass(), TargetPointsArray);
+	}
+	checkf(!TargetPointsArray.IsEmpty(), TEXT("No valid target point found"));
+	uint32 EnemiesSpawnedThisTime = 0;
+	FActorSpawnParameters SpawnParam;
+	SpawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+	for (const FWarriorEnumWaveSpawnerInfo& SpawnerInfo : GetCurrentWaveSpawnerTableRow()->EnemyWaveSpawnDefinitions )
+	{
+		if (SpawnerInfo.SoftEnemyClassToSpawn.IsNull())
+		{
+			continue;
+		}
+		UClass* PreLoadedEnemyClass = PreLoadedEnemyClassMap.FindChecked(SpawnerInfo.SoftEnemyClassToSpawn.Get());
+
+		const int32 NumToSpawn = FMath::RandRange(SpawnerInfo.MinPerSpawnCount, SpawnerInfo.MaxPerSpawnCount);
+		for (int32 i = 0; i < NumToSpawn; ++i)
+		{
+			const int32 RandomTargetPointIndex = FMath::RandRange(0, TargetPointsArray.Num() - 1);
+			const FVector SpawnOrigin = TargetPointsArray[RandomTargetPointIndex]->GetActorLocation();
+			const FRotator SpawnRotation = TargetPointsArray[RandomTargetPointIndex]->GetActorForwardVector().ToOrientationRotator();
+			FVector RandomLocation;
+			UNavigationSystemV1::K2_GetRandomLocationInNavigableRadius(this, SpawnOrigin, RandomLocation, 400.f);
+			RandomLocation += FVector(0.f, 0.f, 150.f);
+			AWarriorEnemyCharacter* SpawnEnemyPtr = GetWorld()->SpawnActor<AWarriorEnemyCharacter>(PreLoadedEnemyClass, RandomLocation, SpawnRotation, SpawnParam);
+			if (SpawnEnemyPtr)
+			{
+				++EnemiesSpawnedThisTime;
+				++TotalSpawnedEnemiesThisWaveCounter;
+			}
+			if (!ShouldKeepSpawnEnemies())
+			{
+				return EnemiesSpawnedThisTime;
+			}
+		}
+	}
+	return EnemiesSpawnedThisTime;
+}
+
+bool AWarriorSurvivalGameMode::ShouldKeepSpawnEnemies() const
+{
+	return TotalSpawnedEnemiesThisWaveCounter < GetCurrentWaveSpawnerTableRow()->TotalEnemyToSpawnThisWave;
+}
+
+FWarriorEnemyWaveSpawnerTableRow* AWarriorSurvivalGameMode::GetCurrentWaveSpawnerTableRow() const
+{
+	const FName RowName = FName(TEXT("Wave") + FString::FromInt(CurrentWaveCount));
+	FWarriorEnemyWaveSpawnerTableRow* FoundRow = EnemyWaveSpawnerDataTable->FindRow<FWarriorEnemyWaveSpawnerTableRow>(RowName, FString());
+	checkf(FoundRow, TEXT("Count not find a valid row "));
+	return FoundRow;
 }
