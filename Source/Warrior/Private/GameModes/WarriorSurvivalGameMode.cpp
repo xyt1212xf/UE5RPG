@@ -8,6 +8,8 @@
 #include "Engine/TargetPoint.h"
 #include "NavigationSystem.h"
 
+
+
 void AWarriorSurvivalGameMode::BeginPlay()
 {
 	Super::BeginPlay();
@@ -61,6 +63,19 @@ void AWarriorSurvivalGameMode::Tick(float DeltaTime)
 	}
 }
 
+void AWarriorSurvivalGameMode::RegisterSpawedEnemies(const TArray<AWarriorEnemyCharacter*>& InEnemiesToRegister)
+{
+	for (AWarriorEnemyCharacter* SpawnedEnemy : InEnemiesToRegister)
+	{
+		if (SpawnedEnemy)
+		{
+			++CurrentSpawnedEnemiesCounter;
+			SpawnedEnemy->OnDestroyed.AddUniqueDynamic(this, &ThisClass::OnEnemyDestoryed);
+		}
+	}
+}
+
+
 void AWarriorSurvivalGameMode::SetCurrentSurvivalGameModeState(EWarriorSurvivalGameModeState InState)
 {
 	CurrentSurvivalGameModeState = InState;
@@ -78,6 +93,8 @@ void AWarriorSurvivalGameMode::PreLoadNextWaveEnemies()
 	{
 		return;
 	}
+	PreLoadedEnemyClassMap.Reset();
+
 	FWarriorEnemyWaveSpawnerTableRow* spawnerTableRowPtr = GetCurrentWaveSpawnerTableRow();
 	for (const FWarriorEnumWaveSpawnerInfo& SpawnerInfo : spawnerTableRowPtr->EnemyWaveSpawnDefinitions)
 	{
@@ -131,6 +148,7 @@ int32 AWarriorSurvivalGameMode::TrySpawnWaveEnemies()
 			AWarriorEnemyCharacter* SpawnEnemyPtr = GetWorld()->SpawnActor<AWarriorEnemyCharacter>(PreLoadedEnemyClass, RandomLocation, SpawnRotation, SpawnParam);
 			if (SpawnEnemyPtr)
 			{
+				SpawnEnemyPtr->OnDestroyed.AddUniqueDynamic(this, &ThisClass::OnEnemyDestoryed);
 				++EnemiesSpawnedThisTime;
 				++TotalSpawnedEnemiesThisWaveCounter;
 			}
@@ -154,4 +172,18 @@ FWarriorEnemyWaveSpawnerTableRow* AWarriorSurvivalGameMode::GetCurrentWaveSpawne
 	FWarriorEnemyWaveSpawnerTableRow* FoundRow = EnemyWaveSpawnerDataTable->FindRow<FWarriorEnemyWaveSpawnerTableRow>(RowName, FString());
 	checkf(FoundRow, TEXT("Count not find a valid row "));
 	return FoundRow;
+}
+
+void AWarriorSurvivalGameMode::OnEnemyDestoryed(AActor* DestoryActor)
+{
+	--CurrentSpawnedEnemiesCounter;
+	if (ShouldKeepSpawnEnemies())
+	{
+		CurrentSpawnedEnemiesCounter += TrySpawnWaveEnemies();
+	}
+	else if (0 == CurrentSpawnedEnemiesCounter)
+	{
+		TotalSpawnedEnemiesThisWaveCounter = 0;
+		SetCurrentSurvivalGameModeState(EWarriorSurvivalGameModeState::WaveCompleted);
+	}
 }

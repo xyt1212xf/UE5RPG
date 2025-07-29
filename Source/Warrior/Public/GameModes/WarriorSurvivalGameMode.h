@@ -54,6 +54,10 @@ UCLASS()
 class WARRIOR_API AWarriorSurvivalGameMode : public AWarriorBaseGameMode
 {
 	GENERATED_BODY()
+public:
+	UFUNCTION(BlueprintCallable)
+	void RegisterSpawedEnemies(const TArray<AWarriorEnemyCharacter*>& InEnemiesToRegister);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -65,6 +69,9 @@ private:
 	int32 TrySpawnWaveEnemies();
 	bool ShouldKeepSpawnEnemies()const;
 	FWarriorEnemyWaveSpawnerTableRow* GetCurrentWaveSpawnerTableRow()const;
+
+	UFUNCTION()
+	void OnEnemyDestoryed(AActor* DestoryActor);
 
 	UPROPERTY()
 	EWarriorSurvivalGameModeState CurrentSurvivalGameModeState;
