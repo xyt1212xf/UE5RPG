@@ -71,13 +71,13 @@ void AWarriorHeroCharacter::PossessedBy(AController* NewController)
 			{
 				switch (BaseGameMode->GetCurrentWarriroGameDifficult())
 				{
-				case EWarriroGameDifficult::Easy:
+				case EWarriorGameDifficult::Easy:
 					AbilityApplyLevel = 4;
-				case EWarriroGameDifficult::Normal:
+				case EWarriorGameDifficult::Normal:
 					AbilityApplyLevel = 3;
-				case EWarriroGameDifficult::Hard:
+				case EWarriorGameDifficult::Hard:
 					AbilityApplyLevel = 2;
-				case EWarriroGameDifficult::VeryHard:
+				case EWarriorGameDifficult::VeryHard:
 					AbilityApplyLevel = 1;
 				default:
 					break;

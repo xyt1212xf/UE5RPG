@@ -17,11 +17,11 @@ class WARRIOR_API AWarriorBaseGameMode : public AGameModeBase
 	GENERATED_BODY()
 public:
 	AWarriorBaseGameMode();
-	EWarriroGameDifficult GetCurrentWarriroGameDifficult() const
+	EWarriorGameDifficult GetCurrentWarriroGameDifficult() const
 	{
 		return CurrentGameDifficulty;
 	}
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Game Settings");
-	EWarriroGameDifficult CurrentGameDifficulty;
+	EWarriorGameDifficult CurrentGameDifficulty;
 };

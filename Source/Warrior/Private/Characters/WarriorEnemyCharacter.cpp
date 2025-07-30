@@ -116,13 +116,13 @@ void AWarriorEnemyCharacter::InitEnemyStartUpData()
 	{
 		switch (BaseGameMode->GetCurrentWarriroGameDifficult())
 		{
-		case EWarriroGameDifficult::Easy:
+		case EWarriorGameDifficult::Easy:
 			AbilityApplyLevel = 1;
-		case EWarriroGameDifficult::Normal:
+		case EWarriorGameDifficult::Normal:
 			AbilityApplyLevel = 2;
-		case EWarriroGameDifficult::Hard:
+		case EWarriorGameDifficult::Hard:
 			AbilityApplyLevel = 3;
-		case EWarriroGameDifficult::VeryHard:
+		case EWarriorGameDifficult::VeryHard:
 			AbilityApplyLevel = 4;
 		default:
 			break;

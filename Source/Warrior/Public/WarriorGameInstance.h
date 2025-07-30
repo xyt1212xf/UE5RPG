@@ -32,6 +32,13 @@ class WARRIOR_API UWarriorGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 public:
+	virtual void Init() override;
+
+protected:
+	virtual void OnPreLoadMap(const FString& MapName);
+	virtual void OnDestinationWorldLoaded(UWorld* LoadedWorld);
+
+public:
 	UFUNCTION(BlueprintPure, meta=(GameplayTagFilter="GameData.Level"))
 	TSoftObjectPtr<UWorld> GetGameLevelByTag(FGameplayTag InGameplayTag) const;
 

@@ -38,7 +38,7 @@ enum class EWarriorCountDownActionOutput : uint8
 };
 
 UENUM(BlueprintType)
-enum class EWarriroGameDifficult : uint8
+enum class EWarriorGameDifficult : uint8
 {
 	Easy,
 	Normal,
