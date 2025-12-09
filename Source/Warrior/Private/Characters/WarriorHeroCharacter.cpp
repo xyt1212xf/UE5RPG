@@ -100,7 +100,8 @@ void AWarriorHeroCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 
 	check(Subsystem);
 	Subsystem->AddMappingContext(InputConfigDataAssetPtr->DefaultMappingContextPtr, 0);
-	auto* WarriorInoutComonent = CastChecked<UWarriorInputComponent>(PlayerInputComponent);
+	//UWarriorInputComponent «ºÃ≥–UEnhancedInputComponent
+	UWarriorInputComponent* WarriorInoutComonent = CastChecked<UWarriorInputComponent>(PlayerInputComponent);
 	WarriorInoutComonent->BindNativeInputAction(InputConfigDataAssetPtr, WarriorGameplayTags::InputTag_Move, ETriggerEvent::Triggered, this,&ThisClass::Input_Move);
 	WarriorInoutComonent->BindNativeInputAction(InputConfigDataAssetPtr, WarriorGameplayTags::InputTag_Look, ETriggerEvent::Triggered, this,&ThisClass::Input_Look);
 	

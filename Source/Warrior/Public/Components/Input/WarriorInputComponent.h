@@ -29,7 +29,7 @@ public:
 	void BindAbilityInputAction(const UDataAsset_InputConfig* InputConfigPtr, UserObject* ContextObjectPtr, CallbackFunc InputPressedFunc, CallbackFunc InputReleaseFunc)
 	{
 		checkf(InputConfigPtr, TEXT("input config data asset is null, can not processed with binding"));
-		for (const auto&  AbilityInputActionConfig : InputConfigPtr->AbilityInputActions)
+		for (const FWarriorInputActionConfig&  AbilityInputActionConfig : InputConfigPtr->AbilityInputActions)
 		{
 			if (AbilityInputActionConfig.IsValid())
 			{

@@ -39,7 +39,7 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Warrior|Combat")
 	void ToggleWeaponCollision(bool bShouldEanble, EToggleWeaponType InToggleWeaponType = EToggleWeaponType::CurrentWeapon);
-	
+
 	virtual void OnHitTargetActor(AActor* HitActor);
 	virtual void OnWeaponPulledFromTargetActor(AActor* InteractedActor);
 

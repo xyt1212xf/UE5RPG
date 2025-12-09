@@ -15,6 +15,7 @@ class WARRIOR_API UWarriorCharacterAnimInstance : public UWarriorBaseAnimInstanc
 {
 	GENERATED_BODY()
 public:
+	//需要实现这2个函数，这2个函数用来获取到MovementComponent和Character
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
@@ -25,10 +26,11 @@ protected:
 	UPROPERTY()
 	UCharacterMovementComponent* OwningMovementPtr;
 
-
+	//速度
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimData|LocalmotionData")
 	float GroundSpeed;
 
+	//是否有加速度
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "AnimData|LocalmotionData")
 	bool bHasAcceleration;
 	
