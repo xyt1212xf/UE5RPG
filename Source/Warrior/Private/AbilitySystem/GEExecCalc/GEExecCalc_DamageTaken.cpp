@@ -1,4 +1,4 @@
-// Fill out your copyright notice in the Description page of Project Settings.
+// Fill			out your copyright notice in the Description page of Project Settings.
 
 
 #include "AbilitySystem/GEExecCalc/GEExecCalc_DamageTaken.h"
@@ -39,8 +39,10 @@ UGEExecCalc_DamageTaken::UGEExecCalc_DamageTaken()
 
 void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustomExecutionParameters& ExecutionParams, FGameplayEffectCustomExecutionOutput& OutExecutionOutput) const
 {
-	const auto& EffectSpec = ExecutionParams.GetOwningSpec();
+	const FGameplayEffectSpec& EffectSpec = ExecutionParams.GetOwningSpec();
 	FAggregatorEvaluateParameters EvaluateParameters;
+	
+	//这两行就是“把攻击方 / 受击方当前的 GameplayTag 快照填到求值上下文里”，让后续所有属性抓取、曲线求值、Modifier 过滤都能按 Tag 条件正确生效
 	EvaluateParameters.SourceTags = EffectSpec.CapturedSourceTags.GetAggregatedTags();
 	EvaluateParameters.TargetTags = EffectSpec.CapturedTargetTags.GetAggregatedTags();
 
@@ -55,8 +57,9 @@ void UGEExecCalc_DamageTaken::Execute_Implementation(const FGameplayEffectCustom
 	float BaseDamage = 0.f;
 	int UsedLightAttackComboCount = 0;
 	int UsedHeavyAttackComboCount = 0;
+										
 	for (const auto&[k, v] : EffectSpec.SetByCallerTagMagnitudes)
-	{
+	{									
 		if (k.MatchesTagExact(WarriorGameplayTags::Shared_SetByCaller_BaseDamage))
 		{
 			BaseDamage = v;

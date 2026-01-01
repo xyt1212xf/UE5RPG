@@ -9,7 +9,7 @@ void UWarriorAbilitySystemComponent::OnAbilityInputPressed(const FGameplayTag& I
 {
 	if (InInputTag.IsValid())
 	{
-		for (const auto& AbilitySpec : GetActivatableAbilities())
+		for (const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 		{
 			if (AbilitySpec.DynamicAbilityTags.HasTagExact(InInputTag))
 			{
@@ -33,7 +33,7 @@ void UWarriorAbilitySystemComponent::OnAbilityInputReleased(const FGameplayTag& 
 	{
 		return;
 	}
-	for (const auto& AbilitySpec : GetActivatableAbilities())
+	for (const FGameplayAbilitySpec& AbilitySpec : GetActivatableAbilities())
 	{
 		if (AbilitySpec.DynamicAbilityTags.HasTagExact(InInputTag) && AbilitySpec.IsActive())
 		{
@@ -51,7 +51,7 @@ void UWarriorAbilitySystemComponent::GrantHeroWeaponAbilities(const TArray<FWarr
 	//{
 	//	return;
 	//}
-	for (const auto& AbilitySet : InDefaultWeaponAbilities)
+	for (const FWarriorHeroAbilitySet& AbilitySet : InDefaultWeaponAbilities)
 	{
 		if (!AbilitySet.IsValid())
 		{
@@ -65,7 +65,7 @@ void UWarriorAbilitySystemComponent::GrantHeroWeaponAbilities(const TArray<FWarr
 		OutGrantedAbilitySpecHandles.AddUnique(GiveAbility(AbilitySpec));
 	}
 
-	for (const auto& AbilitySet : InSpecialWeaponAbilities)
+	for (const FWarriorHeroAbilitySet& AbilitySet : InSpecialWeaponAbilities)
 	{
 		if (!AbilitySet.IsValid())
 		{
@@ -86,7 +86,7 @@ void UWarriorAbilitySystemComponent::RemoveGrantHeroWeaponAbilities(UPARAM(ref)T
 	{
 		return;
 	}
-	for (auto& SpecHandle : InSpecHandlesRemove)
+	for (FGameplayAbilitySpecHandle& SpecHandle : InSpecHandlesRemove)
 	{
 		ClearAbility(SpecHandle);
 	}

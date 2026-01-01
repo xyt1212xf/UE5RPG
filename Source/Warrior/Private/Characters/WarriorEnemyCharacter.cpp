@@ -17,16 +17,23 @@
 
 AWarriorEnemyCharacter::AWarriorEnemyCharacter()
 {
+	//表示这个敌人角色在 被放置到世界中 或 被生成时 会自动被 AI 控制器接管
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
+
+	//禁止角色使用控制器的旋转值来控制自身的朝向（Pitch、Roll、Yaw）。通常用于让角色 根据移动方向自动转向，而不是硬绑定控制器朝向
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
 	bUseControllerRotationYaw = false;
 
+	//角色不会强行朝向控制器方向。
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-
+	//角色会 根据移动方向自动旋转。
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+	//旋转速度为每秒 180 度（Yaw 轴）。
 	GetCharacterMovement()->RotationRate = FRotator(0.f, 180.f, 0.f);
+	//最大行走速度为 300 单位 / 秒。
 	GetCharacterMovement()->MaxWalkSpeed = 300.f;
+	//行走时的减速加速度为 1000，让角色停下更快。
 	GetCharacterMovement()->BrakingDecelerationWalking = 1000.f;
 
 	EnemyCombatComponentPtr = CreateDefaultSubobject<UEnemyCombatComponent>(TEXT("EnemyCombatComponentPtr"));
