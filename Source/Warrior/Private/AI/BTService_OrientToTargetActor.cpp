@@ -9,10 +9,17 @@
 UBTService_OrientToTargetActor::UBTService_OrientToTargetActor()
 {
 	NodeName = TEXT("Native Orient Rotation To Target Actor");
-	INIT_SERVICE_NODE_NOTIFY_FLAGS();
 
+	//初始化父类 UBTService 里的一些事件标记位，告诉引擎“我允许被 Tick / 被中断”等
+	INIT_SERVICE_NODE_NOTIFY_FLAGS();
+	
+	//旋转插值速度，每帧朝目标方向“追赶”5 弧度/秒
 	RotationInterpSpeed = 5.f;
+	
+	//服务节点默认的“执行间隔”。设为 0 表示每帧都 Tick（最频繁）。
 	Interval = 0.f;
+	
+	//在 Interval 基础上再叠加随机偏移，这里不偏移，固定 0
 	RandomDeviation = 0.f;
 
 	InTargetActorKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, InTargetActorKey), AActor::StaticClass());
