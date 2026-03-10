@@ -28,6 +28,7 @@ void UAbilityTaskWaitSpawnEnemies::OnDestroy(bool bInOwnerFinished)
 {
 	FGameplayEventMulticastDelegate& Delegate = AbilitySystemComponent->GenericGameplayEventCallbacks.FindOrAdd(CachedEventTag);
 	Delegate.Remove(DelegateHandle);
+	//这个一定要最后调用
 	Super::OnDestroy(bInOwnerFinished);
 }
 
